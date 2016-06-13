@@ -93,6 +93,52 @@ describe('hLock#unlock failure tracking', function () {
       .catch(done);
   });
 
+  it('should count only attempts on the same lock by the same attempter', function (done) {
+    var hl = ASSETS.hl;
+    var attempter1 = 'one';
+    var attempter2 = 'two';
+
+    function errorExpected() {
+      done(new Error('error expected'));
+    }
+
+    // attempter1 1st attempt
+    hl.unlock('lock-1', 'wrong-password', attempter1)
+      .then(errorExpected, (err) => {
+        err.should.be.instanceof(hLock.errors.InvalidSecret);
+
+        // attempter2 1st attempt
+        return hl.unlock('lock-1', 'wrong-password', attempter2);
+      })
+      .then(errorExpected, (err) => {
+        err.should.be.instanceof(hLock.errors.InvalidSecret);
+
+        // attempter2 2nd attempt
+        return hl.unlock('lock-1', 'wrong-password', attempter2);
+      })
+      .then(errorExpected, (err) => {
+        err.should.be.instanceof(hLock.errors.InvalidSecret);
+
+        // attempter1 2nd attempt (should be successful)
+        return hl.unlock('lock-1', 'secret-1', attempter1);
+      })
+      .then(() => {
+
+        // success
+        
+        // attempter2 3rd attempt with correct credentials
+        // but should fail due to cooldown
+        return hl.unlock('lock-1', 'secret-1', attempter2);
+      })
+      .then(errorExpected, (err) => {
+        err.should.be.instanceof(hLock.errors.LockTemporarilyDisabled);
+        err.reason.should.equal('MaxFailedUnlockAttemptsReached');
+
+        done();
+      })
+      .catch(done);
+  });
+
   it('should permanently disable the lock if maxUnlockFailures is exceeded', function (done) {
 
     this.timeout(7000);
