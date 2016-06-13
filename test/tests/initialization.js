@@ -47,4 +47,15 @@ describe('initialization', function () {
   it('should initialize correctly in case all required options are passed', function () {
     var ht = hToken(REQUIRED_OPTIONS);
   });
+
+  it('should throw error if `unlockFailureCountMode` is provided and is invalid', function () {
+    var options = _clone(REQUIRED_OPTIONS);
+
+    options.unlockFailureCountMode = 'INVALID';
+
+    assert.throws(function () {
+      var ht = hToken(options);
+    });
+
+  });
 });

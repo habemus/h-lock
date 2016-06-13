@@ -9,7 +9,7 @@ const hLock = require('../../lib');
 // auxiliary
 const aux    = require('../auxiliary');
 
-describe('hLock#destroy', function () {
+describe('hLock#disable', function () {
 
   var ASSETS = {};
 
@@ -41,8 +41,8 @@ describe('hLock#destroy', function () {
     aux.teardown().then(() => { done(); });
   });
 
-  it('should remove the lock from the database', function (done) {
-    ASSETS.hl.destroy('lock-1')
+  it('should set the lock\'s status to disabled', function (done) {
+    ASSETS.hl.disable('lock-1', 'SOME_REASON')
       .then((result) => {
 
         should(result).be.undefined();
@@ -51,13 +51,30 @@ describe('hLock#destroy', function () {
         return ASSETS.db.collection('testlocks').find({ name: 'lock-1' }).toArray();
       })
       .then((locks) => {
-        locks.length.should.equal(0);
+        locks.length.should.equal(1);
+
+        // check lock's status
+        locks[0]._status.value.should.equal('disabled');
+        locks[0]._status.reason.should.equal('SOME_REASON');
 
         // check that it is not possible to unlock lock-1 anymore
         return ASSETS.hl.unlock('lock-1', 'secret-1', 'attempter');
       })
       .then(() => {
         done(new Error('expected error'));
+      }, (err) => {
+        err.should.be.instanceof(hLock.errors.LockPermanentlyDisabled);
+        err.reason.should.equal('SOME_REASON');
+
+        done();
+      })
+      .catch(done);
+  });
+
+  it('should fail if trying to disable lock that does not exist', function (done) {
+    ASSETS.hl.disable('lock-that-does-not-exist', 'SOME_REASON')
+      .then(() => {
+        done(new Error('error expected'));
       }, (err) => {
         err.should.be.instanceof(hLock.errors.InexistentLockName);
 
@@ -66,18 +83,12 @@ describe('hLock#destroy', function () {
       .catch(done);
   });
 
-  it('should allow removing to remove a lock that does not exist', function (done) {
-
-    ASSETS.hl.destroy('lock-that-does-not-exist')
-      .then((result) => {
-
-        should(result).be.undefined();
-
-        // check that the number of locks in the database remains the same
-        return ASSETS.db.collection('testlocks').find().toArray();
-      })
-      .then((locks) => {
-        locks.length.should.equal(3);
+  it('require lockName', function (done) {
+    ASSETS.hl.disable(undefined, 'SOME_REASON')
+      .then(() => {
+        done(new Error('error expected'));
+      }, (err) => {
+        err.should.be.instanceof(hLock.errors.InvalidLockName);
 
         done();
       })

@@ -39,8 +39,8 @@ describe('hLock#create', function () {
       }, (err) => {
 
         err.should.be.instanceof(hLock.errors.HLockError);
-        err.should.be.instanceof(hLock.errors.MissingLockName);
-        err.name.should.equal('MissingLockName');
+        err.should.be.instanceof(hLock.errors.InvalidLockName);
+        err.name.should.equal('InvalidLockName');
 
         // make sure no db entry was created
         ASSETS.db.collection('testlocks').find().toArray((err, locks) => {
@@ -62,8 +62,8 @@ describe('hLock#create', function () {
         done(new Error('error expected'));
       }, (err) => {
         err.should.be.instanceof(hLock.errors.HLockError);
-        err.should.be.instanceof(hLock.errors.MissingLockSecret);
-        err.name.should.equal('MissingLockSecret');
+        err.should.be.instanceof(hLock.errors.InvalidLockSecret);
+        err.name.should.equal('InvalidLockSecret');
 
         // make sure no db entry was created
         ASSETS.db.collection('testlocks').find().toArray((err, locks) => {

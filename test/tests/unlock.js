@@ -42,7 +42,7 @@ describe('hLock#unlock', function () {
   });
 
   it('should unlock if the secret is correct', function (done) {
-    ASSETS.hl.unlock('lock-1', 'secret-1')
+    ASSETS.hl.unlock('lock-1', 'secret-1', 'attempter-id')
       .then((result) => {
 
         // make sure the unlock function returns undefined.
@@ -55,7 +55,7 @@ describe('hLock#unlock', function () {
   });
 
   it('should fail if secret is incorrect', function (done) {
-    ASSETS.hl.unlock('lock-1', 'secret-2')
+    ASSETS.hl.unlock('lock-1', 'secret-2', 'attempter-id')
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {
@@ -68,7 +68,7 @@ describe('hLock#unlock', function () {
   });
 
   it('should fail if lock name does not exist', function (done) {
-    ASSETS.hl.unlock('lock-that-does-not-exist', 'secret-2')
+    ASSETS.hl.unlock('lock-that-does-not-exist', 'secret-2', 'attempter-id')
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {
@@ -81,12 +81,12 @@ describe('hLock#unlock', function () {
   });
 
   it('should fail if no lockname is passed', function (done) {
-    ASSETS.hl.unlock(undefined, 'secret-2')
+    ASSETS.hl.unlock(undefined, 'secret-2', 'attempter-id')
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {
-        err.should.be.instanceof(hLock.errors.MissingLockName);
-        err.name.should.equal('MissingLockName');
+        err.should.be.instanceof(hLock.errors.InvalidLockName);
+        err.name.should.equal('InvalidLockName');
 
         done();
       })
@@ -94,12 +94,25 @@ describe('hLock#unlock', function () {
   });
 
   it('should fail if no secret is passed', function (done) {
-    ASSETS.hl.unlock('lock-1', undefined)
+    ASSETS.hl.unlock('lock-1', undefined, 'attempter-id')
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {
-        err.should.be.instanceof(hLock.errors.MissingLockSecret);
-        err.name.should.equal('MissingLockSecret');
+        err.should.be.instanceof(hLock.errors.InvalidLockSecret);
+        err.name.should.equal('InvalidLockSecret');
+
+        done();
+      })
+      .catch(done);
+  });
+
+  it('should fail if no attempter-id is passed', function (done) {
+    ASSETS.hl.unlock('lock-1', 'secret-1', undefined)
+      .then(() => {
+        done(new Error('expected error'));
+      }, (err) => {
+        err.should.be.instanceof(hLock.errors.InvalidAttempterId);
+        err.name.should.equal('InvalidAttempterId');
 
         done();
       })

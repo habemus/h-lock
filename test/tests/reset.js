@@ -9,7 +9,7 @@ const hLock = require('../../lib');
 // auxiliary
 const aux    = require('../auxiliary');
 
-describe('hLock#unlock', function () {
+describe('hLock#reset', function () {
 
   var ASSETS = {};
 
@@ -50,7 +50,7 @@ describe('hLock#unlock', function () {
         should(result).be.undefined();
 
         // check that the lock's secret has been changed
-        return ASSETS.hl.unlock('lock-1', 'another-secret');
+        return ASSETS.hl.unlock('lock-1', 'another-secret', 'attempter-id');
       })
       .then(() => {
         done();
@@ -76,8 +76,8 @@ describe('hLock#unlock', function () {
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {
-        err.should.be.instanceof(hLock.errors.MissingLockName);
-        err.name.should.equal('MissingLockName');
+        err.should.be.instanceof(hLock.errors.InvalidLockName);
+        err.name.should.equal('InvalidLockName');
 
         done();
       })
@@ -89,8 +89,8 @@ describe('hLock#unlock', function () {
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {
-        err.should.be.instanceof(hLock.errors.MissingLockSecret);
-        err.name.should.equal('MissingLockSecret');
+        err.should.be.instanceof(hLock.errors.InvalidLockSecret);
+        err.name.should.equal('InvalidLockSecret');
 
         done();
       })
