@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^0.8.7",
+    "bluebird": "^3.4.0",
     "mongoose": "^4.4.20"
   },
   "devDependencies": {
