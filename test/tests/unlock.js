@@ -94,7 +94,7 @@ describe('hLock#unlock', function () {
   });
 
   it('should fail if no secret is passed', function (done) {
-    ASSETS.hl.unlock('lock-that-does-not-exist', undefined)
+    ASSETS.hl.unlock('lock-1', undefined)
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {

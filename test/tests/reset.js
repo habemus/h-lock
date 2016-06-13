@@ -41,24 +41,29 @@ describe('hLock#unlock', function () {
     aux.teardown().then(() => { done(); });
   });
 
-  it('should remove the lock from the database', function (done) {
-    ASSETS.hl.destroy('lock-1')
+  it('should change the secret of the lock', function (done) {
+    ASSETS.hl.reset('lock-1', 'another-secret')
       .then((result) => {
 
+        // make sure the unlock function returns undefined.
+        // if unlocking fails, it will fail the promise itself
         should(result).be.undefined();
 
-        // check that lock-1 has been removed from the database
-        return ASSETS.db.collection('testlocks').find({ name: 'lock-1' }).toArray();
+        // check that the lock's secret has been changed
+        return ASSETS.hl.unlock('lock-1', 'another-secret');
       })
-      .then((locks) => {
-        locks.length.should.equal(0);
+      .then(() => {
+        done();
+      })
+      .catch(done);
+  });
 
-        // check that it is not possible to unlock lock-1 anymore
-        return ASSETS.hl.unlock('lock-1', 'secret-1');
-      })
+  it('should fail to change the secret of a lock that does not exist', function (done) {
+    ASSETS.hl.reset('lock-that-does-not-exist', 'another-secret')
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {
+
         err.should.be.instanceof(hLock.errors.InexistentLockName);
 
         done();
@@ -66,22 +71,29 @@ describe('hLock#unlock', function () {
       .catch(done);
   });
 
-  it('should allow removing to remove a lock that does not exist', function (done) {
-
-    ASSETS.hl.destroy('lock-that-does-not-exist')
-      .then((result) => {
-
-        should(result).be.undefined();
-
-        // check that the number of locks in the database remains the same
-        return ASSETS.db.collection('testlocks').find().toArray();
-      })
-      .then((locks) => {
-        locks.length.should.equal(3);
+  it('should fail if no lockname is passed', function (done) {
+    ASSETS.hl.reset(undefined, 'another-secret')
+      .then(() => {
+        done(new Error('expected error'));
+      }, (err) => {
+        err.should.be.instanceof(hLock.errors.MissingLockName);
+        err.name.should.equal('MissingLockName');
 
         done();
       })
       .catch(done);
   });
 
+  it('should fail if no secret is passed', function (done) {
+    ASSETS.hl.reset('lock-1', undefined)
+      .then(() => {
+        done(new Error('expected error'));
+      }, (err) => {
+        err.should.be.instanceof(hLock.errors.MissingLockSecret);
+        err.name.should.equal('MissingLockSecret');
+
+        done();
+      })
+      .catch(done);
+  });
 });
