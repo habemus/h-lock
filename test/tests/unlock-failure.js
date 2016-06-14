@@ -3,6 +3,7 @@ const assert = require('assert');
 // third-party dependencies
 const should = require('should');
 const debug = require('debug')('h-lock-unlock-failure');
+const Bluebird = require('bluebird');
 
 // lib
 const hLock = require('../../lib');
@@ -68,8 +69,11 @@ describe('hLock#unlock failure tracking', function () {
       done(new Error('error expected'));
     }
 
-    hl.unlock(ASSETS.lockId, 'wrong-password', attempterId)
-      .then(errorExpected, (err) => {
+    var promise = hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
+
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         return hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
@@ -106,8 +110,11 @@ describe('hLock#unlock failure tracking', function () {
     }
 
     // attempter1 1st attempt
-    hl.unlock(ASSETS.lockId, 'wrong-password', attempter1)
-      .then(errorExpected, (err) => {
+    var promise = hl.unlock(ASSETS.lockId, 'wrong-password', attempter1);
+
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // attempter2 1st attempt
@@ -154,8 +161,10 @@ describe('hLock#unlock failure tracking', function () {
     }
 
     // 1st failure
-    hl.unlock(ASSETS.lockId, 'wrong-password', attempterId)
-      .then(errorExpected, (err) => {
+    var promise = hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // 2nd consecutive failure
@@ -200,8 +209,10 @@ describe('hLock#unlock failure tracking', function () {
     }
 
     // 1st failure
-    hl.unlock(ASSETS.lockId, 'wrong-password', attempterId)
-      .then(errorExpected, (err) => {
+    var promise = hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // 2nd consecutive failure

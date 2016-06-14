@@ -2,6 +2,7 @@ const assert = require('assert');
 
 // third-party dependencies
 const should = require('should');
+const Bluebird = require('bluebird');
 
 // lib
 const hLock = require('../../lib');
@@ -48,8 +49,10 @@ describe('hLock#unlock', function () {
 
   it('should unlock if the secret is correct', function (done) {
 
-    ASSETS.hl.unlock(ASSETS.lockId1, 'secret-1', 'attempter-id')
-      .then((result) => {
+    var promise = ASSETS.hl.unlock(ASSETS.lockId1, 'secret-1', 'attempter-id');
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then((result) => {
 
         // make sure the unlock function returns undefined.
         // if unlocking fails, it will fail the promise itself
@@ -61,8 +64,10 @@ describe('hLock#unlock', function () {
   });
 
   it('should fail if secret is incorrect', function (done) {
-    ASSETS.hl.unlock(ASSETS.lockId1, 'secret-2', 'attempter-id')
-      .then(() => {
+    var promise = ASSETS.hl.unlock(ASSETS.lockId1, 'secret-2', 'attempter-id');
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(() => {
         done(new Error('expected error'));
       }, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
@@ -76,8 +81,10 @@ describe('hLock#unlock', function () {
   it('should fail if lock does not exist', function (done) {
     // 575f5ed506dffab02dbc249f is an id generated at mongodb shell
     // it probably does not exist as it shouldn't be reused by mongo
-    ASSETS.hl.unlock('575f5ed506dffab02dbc249f', 'secret-2', 'attempter-id')
-      .then(() => {
+    var promise = ASSETS.hl.unlock('575f5ed506dffab02dbc249f', 'secret-2', 'attempter-id');
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(() => {
         done(new Error('expected error'));
       }, (err) => {
         err.should.be.instanceof(hLock.errors.InexistentLock);
@@ -89,8 +96,10 @@ describe('hLock#unlock', function () {
   });
 
   it('should fail if no lockId is passed', function (done) {
-    ASSETS.hl.unlock(undefined, 'secret-2', 'attempter-id')
-      .then(() => {
+    var promise = ASSETS.hl.unlock(undefined, 'secret-2', 'attempter-id');
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(() => {
         done(new Error('expected error'));
       }, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidLockId);
@@ -102,8 +111,10 @@ describe('hLock#unlock', function () {
   });
 
   it('should fail if no secret is passed', function (done) {
-    ASSETS.hl.unlock(ASSETS.lockId1, undefined, 'attempter-id')
-      .then(() => {
+    var promise = ASSETS.hl.unlock(ASSETS.lockId1, undefined, 'attempter-id');
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(() => {
         done(new Error('expected error'));
       }, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidLockSecret);
@@ -115,8 +126,10 @@ describe('hLock#unlock', function () {
   });
 
   it('should fail if no attempter-id is passed', function (done) {
-    ASSETS.hl.unlock(ASSETS.lockId1, 'secret-1', undefined)
-      .then(() => {
+    var promise = ASSETS.hl.unlock(ASSETS.lockId1, 'secret-1', undefined);
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(() => {
         done(new Error('expected error'));
       }, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidAttempterId);

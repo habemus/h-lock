@@ -3,6 +3,7 @@ const assert = require('assert');
 // third-party dependencies
 const should = require('should');
 const ObjectId = require('mongoose').Types.ObjectId;
+const Bluebird = require('bluebird');
 
 // lib
 const hLock = require('../../lib');
@@ -48,8 +49,12 @@ describe('hLock#reset', function () {
   });
 
   it('should change the secret of the lock', function (done) {
-    ASSETS.hl.reset(ASSETS.lockId1, 'another-secret')
-      .then((result) => {
+
+    var promise = ASSETS.hl.reset(ASSETS.lockId1, 'another-secret');
+
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then((result) => {
 
         // make sure the unlock function returns undefined.
         // if unlocking fails, it will fail the promise itself
@@ -65,8 +70,12 @@ describe('hLock#reset', function () {
   });
 
   it('should fail to change the secret of a lock that does not exist', function (done) {
-    ASSETS.hl.reset(new ObjectId().toString(), 'another-secret')
-      .then(() => {
+
+    var promise = ASSETS.hl.reset(new ObjectId().toString(), 'another-secret');
+
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(() => {
         done(new Error('expected error'));
       }, (err) => {
 
@@ -78,8 +87,12 @@ describe('hLock#reset', function () {
   });
 
   it('should fail if no lockId is passed', function (done) {
-    ASSETS.hl.reset(undefined, 'another-secret')
-      .then(() => {
+
+    var promise = ASSETS.hl.reset(undefined, 'another-secret');
+
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(() => {
         done(new Error('expected error'));
       }, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidLockId);
@@ -91,8 +104,11 @@ describe('hLock#reset', function () {
   });
 
   it('should fail if no secret is passed', function (done) {
-    ASSETS.hl.reset(ASSETS.lockId1, undefined)
-      .then(() => {
+
+    var promise = ASSETS.hl.reset(ASSETS.lockId1, undefined);
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(() => {
         done(new Error('expected error'));
       }, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidLockSecret);

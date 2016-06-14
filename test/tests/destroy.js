@@ -2,6 +2,7 @@ const assert = require('assert');
 
 // third-party dependencies
 const should = require('should');
+const Bluebird = require('bluebird');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 // lib
@@ -48,8 +49,12 @@ describe('hLock#destroy', function () {
   });
 
   it('should remove the lock from the database', function (done) {
-    ASSETS.hl.destroy(ASSETS.lockId1)
-      .then((result) => {
+
+    var promise = ASSETS.hl.destroy(ASSETS.lockId1);
+
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then((result) => {
 
         should(result).be.undefined();
 
@@ -73,10 +78,11 @@ describe('hLock#destroy', function () {
   });
 
   it('should allow removing a lock that does not exist', function (done) {
+    var promise = ASSETS.hl.destroy(new ObjectId().toString());
 
-    ASSETS.hl.destroy(new ObjectId().toString())
-      .then((result) => {
+    promise.should.be.instanceof(Bluebird);
 
+    promise.then((result) => {
         should(result).be.undefined();
 
         // check that the number of locks in the database remains the same
@@ -91,8 +97,11 @@ describe('hLock#destroy', function () {
   });
 
   it('should require a lockId', function (done) {
-    ASSETS.hl.destroy(undefined)
-      .then(() => {
+    var promise = ASSETS.hl.destroy(undefined);
+
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then(() => {
         done(new Error('error expected'));
       }, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidLockId);
