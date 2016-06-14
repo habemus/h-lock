@@ -31,33 +31,9 @@ describe('hLock#create', function () {
     aux.teardown().then(() => { done(); });
   });
 
-  it('should require a lock name', function (done) {
-
-    ASSETS.hl.create(undefined, 'my-secret', {})
-      .then(() => {
-        done(new Error('error expected'));
-      }, (err) => {
-
-        err.should.be.instanceof(hLock.errors.HLockError);
-        err.should.be.instanceof(hLock.errors.InvalidLockName);
-        err.name.should.equal('InvalidLockName');
-
-        // make sure no db entry was created
-        ASSETS.db.collection('testlocks').find().toArray((err, locks) => {
-          if (err) { return done(err); }
-
-          locks.length.should.equal(0);
-
-          done();
-        });
-
-      })
-      .catch(done);
-  });
-
   it('should require a lock secret', function (done) {
 
-    ASSETS.hl.create('name', undefined, {})
+    ASSETS.hl.create(undefined, {})
       .then(() => {
         done(new Error('error expected'));
       }, (err) => {
@@ -80,8 +56,10 @@ describe('hLock#create', function () {
 
   it('should create a lock entry', function (done) {
 
-    ASSETS.hl.create('my-lock', 'my-secret', {})
-      .then(() => {
+    ASSETS.hl.create('my-secret', {})
+      .then((lockId) => {
+
+        lockId.should.be.a.String();
 
         return ASSETS.db.collection('testlocks').find().toArray();
       })
@@ -93,37 +71,6 @@ describe('hLock#create', function () {
       .catch((err) => {
 
 
-        done(err);
-      });
-  });
-
-  it('should require lockName to be unique', function (done) {
-
-    ASSETS.hl.create('my-lock', 'my-secret', {})
-      .then(() => {
-
-        return ASSETS.db.collection('testlocks').find().toArray();
-      })
-      .then((locks) => {
-        locks.length.should.equal(1);
-
-        // try to create same lock
-        return ASSETS.hl.create('my-lock', 'my-secret', {});
-
-      })
-      .then(() => {
-        done(new Error('error expected'));
-      }, (err) => {
-
-        err.should.be.instanceof(hLock.errors.HLockError);
-        err.should.be.instanceof(hLock.errors.NonUniqueLockName);
-
-        err.name.should.equal('NonUniqueLockName');
-
-        done();
-
-      })
-      .catch((err) => {
         done(err);
       });
   });

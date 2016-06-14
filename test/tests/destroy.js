@@ -2,6 +2,7 @@ const assert = require('assert');
 
 // third-party dependencies
 const should = require('should');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 // lib
 const hLock = require('../../lib');
@@ -31,7 +32,12 @@ describe('hLock#destroy', function () {
 
         return Promise.all([lock1, lock2, lock3]);
       })
-      .then(() => {
+      .then((locks) => {
+
+        ASSETS.lockId1 = locks[0];
+        ASSETS.lockId2 = locks[1];
+        ASSETS.lockId3 = locks[2];
+
         done();
       })
       .catch(done);
@@ -42,33 +48,33 @@ describe('hLock#destroy', function () {
   });
 
   it('should remove the lock from the database', function (done) {
-    ASSETS.hl.destroy('lock-1')
+    ASSETS.hl.destroy(ASSETS.lockId1)
       .then((result) => {
 
         should(result).be.undefined();
 
         // check that lock-1 has been removed from the database
-        return ASSETS.db.collection('testlocks').find({ name: 'lock-1' }).toArray();
+        return ASSETS.db.collection('testlocks').find({ _id: ASSETS.lockId1 }).toArray();
       })
       .then((locks) => {
         locks.length.should.equal(0);
 
         // check that it is not possible to unlock lock-1 anymore
-        return ASSETS.hl.unlock('lock-1', 'secret-1', 'attempter');
+        return ASSETS.hl.unlock(ASSETS.lockId1, 'secret-1', 'attempter');
       })
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {
-        err.should.be.instanceof(hLock.errors.InexistentLockName);
+        err.should.be.instanceof(hLock.errors.InexistentLock);
 
         done();
       })
       .catch(done);
   });
 
-  it('should allow removing to remove a lock that does not exist', function (done) {
+  it('should allow removing a lock that does not exist', function (done) {
 
-    ASSETS.hl.destroy('lock-that-does-not-exist')
+    ASSETS.hl.destroy(new ObjectId().toString())
       .then((result) => {
 
         should(result).be.undefined();
@@ -80,6 +86,19 @@ describe('hLock#destroy', function () {
         locks.length.should.equal(3);
 
         done();
+      })
+      .catch(done);
+  });
+
+  it('should require a lockId', function (done) {
+    ASSETS.hl.destroy(undefined)
+      .then(() => {
+        done(new Error('error expected'));
+      }, (err) => {
+        err.should.be.instanceof(hLock.errors.InvalidLockId);
+
+        done();
+
       })
       .catch(done);
   });

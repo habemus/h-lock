@@ -2,6 +2,7 @@ const assert = require('assert');
 
 // third-party dependencies
 const should = require('should');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 // lib
 const hLock = require('../../lib');
@@ -25,13 +26,18 @@ describe('hLock#reset', function () {
         });
 
         // create some locks
-        var lock1 = ASSETS.hl.create('lock-1', 'secret-1');
-        var lock2 = ASSETS.hl.create('lock-2', 'secret-2');
-        var lock3 = ASSETS.hl.create('lock-3', 'secret-3');
+        var lock1 = ASSETS.hl.create('secret-1');
+        var lock2 = ASSETS.hl.create('secret-2');
+        var lock3 = ASSETS.hl.create('secret-3');
 
         return Promise.all([lock1, lock2, lock3]);
       })
-      .then(() => {
+      .then((lockIds) => {
+
+        ASSETS.lockId1 = lockIds[0];
+        ASSETS.lockId2 = lockIds[1];
+        ASSETS.lockId3 = lockIds[2];
+
         done();
       })
       .catch(done);
@@ -42,7 +48,7 @@ describe('hLock#reset', function () {
   });
 
   it('should change the secret of the lock', function (done) {
-    ASSETS.hl.reset('lock-1', 'another-secret')
+    ASSETS.hl.reset(ASSETS.lockId1, 'another-secret')
       .then((result) => {
 
         // make sure the unlock function returns undefined.
@@ -50,7 +56,7 @@ describe('hLock#reset', function () {
         should(result).be.undefined();
 
         // check that the lock's secret has been changed
-        return ASSETS.hl.unlock('lock-1', 'another-secret', 'attempter-id');
+        return ASSETS.hl.unlock(ASSETS.lockId1, 'another-secret', 'attempter-id');
       })
       .then(() => {
         done();
@@ -59,25 +65,25 @@ describe('hLock#reset', function () {
   });
 
   it('should fail to change the secret of a lock that does not exist', function (done) {
-    ASSETS.hl.reset('lock-that-does-not-exist', 'another-secret')
+    ASSETS.hl.reset(new ObjectId().toString(), 'another-secret')
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {
 
-        err.should.be.instanceof(hLock.errors.InexistentLockName);
+        err.should.be.instanceof(hLock.errors.InexistentLock);
 
         done();
       })
       .catch(done);
   });
 
-  it('should fail if no lockname is passed', function (done) {
+  it('should fail if no lockId is passed', function (done) {
     ASSETS.hl.reset(undefined, 'another-secret')
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {
-        err.should.be.instanceof(hLock.errors.InvalidLockName);
-        err.name.should.equal('InvalidLockName');
+        err.should.be.instanceof(hLock.errors.InvalidLockId);
+        err.name.should.equal('InvalidLockId');
 
         done();
       })
@@ -85,7 +91,7 @@ describe('hLock#reset', function () {
   });
 
   it('should fail if no secret is passed', function (done) {
-    ASSETS.hl.reset('lock-1', undefined)
+    ASSETS.hl.reset(ASSETS.lockId1, undefined)
       .then(() => {
         done(new Error('expected error'));
       }, (err) => {

@@ -2,6 +2,7 @@ const assert = require('assert');
 
 // third-party dependencies
 const should = require('should');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 // lib
 const hLock = require('../../lib');
@@ -25,13 +26,18 @@ describe('hLock#disable', function () {
         });
 
         // create some locks
-        var lock1 = ASSETS.hl.create('lock-1', 'secret-1');
-        var lock2 = ASSETS.hl.create('lock-2', 'secret-2');
-        var lock3 = ASSETS.hl.create('lock-3', 'secret-3');
+        var lock1 = ASSETS.hl.create('secret-1');
+        var lock2 = ASSETS.hl.create('secret-2');
+        var lock3 = ASSETS.hl.create('secret-3');
 
         return Promise.all([lock1, lock2, lock3]);
       })
-      .then(() => {
+      .then((lockIds) => {
+
+        ASSETS.lockId1 = lockIds[0];
+        ASSETS.lockId2 = lockIds[1];
+        ASSETS.lockId3 = lockIds[2];
+
         done();
       })
       .catch(done);
@@ -42,15 +48,16 @@ describe('hLock#disable', function () {
   });
 
   it('should set the lock\'s status to disabled', function (done) {
-    ASSETS.hl.disable('lock-1', 'SOME_REASON')
+    ASSETS.hl.disable(ASSETS.lockId1, 'SOME_REASON')
       .then((result) => {
 
         should(result).be.undefined();
 
         // check that lock-1 has been removed from the database
-        return ASSETS.db.collection('testlocks').find({ name: 'lock-1' }).toArray();
+        return ASSETS.db.collection('testlocks').find({ _id: new ObjectId(ASSETS.lockId1) }).toArray();
       })
       .then((locks) => {
+
         locks.length.should.equal(1);
 
         // check lock's status
@@ -58,7 +65,7 @@ describe('hLock#disable', function () {
         locks[0]._status.reason.should.equal('SOME_REASON');
 
         // check that it is not possible to unlock lock-1 anymore
-        return ASSETS.hl.unlock('lock-1', 'secret-1', 'attempter');
+        return ASSETS.hl.unlock(ASSETS.lockId1, 'secret-1', 'attempter');
       })
       .then(() => {
         done(new Error('expected error'));
@@ -72,23 +79,23 @@ describe('hLock#disable', function () {
   });
 
   it('should fail if trying to disable lock that does not exist', function (done) {
-    ASSETS.hl.disable('lock-that-does-not-exist', 'SOME_REASON')
+    ASSETS.hl.disable(new ObjectId().toString(), 'SOME_REASON')
       .then(() => {
         done(new Error('error expected'));
       }, (err) => {
-        err.should.be.instanceof(hLock.errors.InexistentLockName);
+        err.should.be.instanceof(hLock.errors.InexistentLock);
 
         done();
       })
       .catch(done);
   });
 
-  it('require lockName', function (done) {
+  it('require lockId', function (done) {
     ASSETS.hl.disable(undefined, 'SOME_REASON')
       .then(() => {
         done(new Error('error expected'));
       }, (err) => {
-        err.should.be.instanceof(hLock.errors.InvalidLockName);
+        err.should.be.instanceof(hLock.errors.InvalidLockId);
 
         done();
       })

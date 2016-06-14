@@ -44,9 +44,12 @@ describe('hLock#unlock failure tracking', function () {
         });
 
         // create one lock
-        return ASSETS.hl.create('lock-1', 'secret-1');
+        return ASSETS.hl.create('secret-1');
       })
-      .then(() => {
+      .then((lockId) => {
+
+        ASSETS.lockId = lockId;
+
         // ok
         done();
       })
@@ -65,16 +68,16 @@ describe('hLock#unlock failure tracking', function () {
       done(new Error('error expected'));
     }
 
-    hl.unlock('lock-1', 'wrong-password', attempterId)
+    hl.unlock(ASSETS.lockId, 'wrong-password', attempterId)
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
-        return hl.unlock('lock-1', 'wrong-password', attempterId);
+        return hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
-        return hl.unlock('lock-1', 'wrong-password', attempterId);
+        return hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.LockTemporarilyDisabled);
@@ -82,7 +85,7 @@ describe('hLock#unlock failure tracking', function () {
 
         // should be temporarily disabled
         // even if secret is correct
-        return hl.unlock('lock-1', 'secret-1', attempterId);
+        return hl.unlock(ASSETS.lockId, 'secret-1', attempterId);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.LockTemporarilyDisabled);
@@ -103,24 +106,24 @@ describe('hLock#unlock failure tracking', function () {
     }
 
     // attempter1 1st attempt
-    hl.unlock('lock-1', 'wrong-password', attempter1)
+    hl.unlock(ASSETS.lockId, 'wrong-password', attempter1)
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // attempter2 1st attempt
-        return hl.unlock('lock-1', 'wrong-password', attempter2);
+        return hl.unlock(ASSETS.lockId, 'wrong-password', attempter2);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // attempter2 2nd attempt
-        return hl.unlock('lock-1', 'wrong-password', attempter2);
+        return hl.unlock(ASSETS.lockId, 'wrong-password', attempter2);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // attempter1 2nd attempt (should be successful)
-        return hl.unlock('lock-1', 'secret-1', attempter1);
+        return hl.unlock(ASSETS.lockId, 'secret-1', attempter1);
       })
       .then(() => {
 
@@ -128,7 +131,7 @@ describe('hLock#unlock failure tracking', function () {
         
         // attempter2 3rd attempt with correct credentials
         // but should fail due to cooldown
-        return hl.unlock('lock-1', 'secret-1', attempter2);
+        return hl.unlock(ASSETS.lockId, 'secret-1', attempter2);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.LockTemporarilyDisabled);
@@ -151,12 +154,12 @@ describe('hLock#unlock failure tracking', function () {
     }
 
     // 1st failure
-    hl.unlock('lock-1', 'wrong-password', attempterId)
+    hl.unlock(ASSETS.lockId, 'wrong-password', attempterId)
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // 2nd consecutive failure
-        return hl.unlock('lock-1', 'wrong-password', attempterId);
+        return hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
@@ -167,14 +170,14 @@ describe('hLock#unlock failure tracking', function () {
       .then(() => {
 
         // 3rd consecutive failure
-        return hl.unlock('lock-1', 'wrong-password', attempterId);
+        return hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // 4th attempt after 3 consecutive failures should return permanently disable
         // even with the correct secret
-        return hl.unlock('lock-1', 'secret-1', attempterId);
+        return hl.unlock(ASSETS.lockId, 'secret-1', attempterId);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.LockPermanentlyDisabled);
@@ -197,18 +200,18 @@ describe('hLock#unlock failure tracking', function () {
     }
 
     // 1st failure
-    hl.unlock('lock-1', 'wrong-password', attempterId)
+    hl.unlock(ASSETS.lockId, 'wrong-password', attempterId)
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // 2nd consecutive failure
-        return hl.unlock('lock-1', 'wrong-password', attempterId);
+        return hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // Temporary disable
-        return hl.unlock('lock-1', 'secret-1', attempterId);
+        return hl.unlock(ASSETS.lockId, 'secret-1', attempterId);
       })
       .then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.LockTemporarilyDisabled);
@@ -220,14 +223,14 @@ describe('hLock#unlock failure tracking', function () {
       })
       .then(() => {
         // successful unlock
-        return hl.unlock('lock-1', 'secret-1', attempterId);
+        return hl.unlock(ASSETS.lockId, 'secret-1', attempterId);
       })
       .then(() => {
 
         // failure count should restart
 
         // 1st failure
-        return hl.unlock('lock-1', 'wrong-password', attempterId);
+        return hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
 
       })
       .then(errorExpected, (err) => {
@@ -238,7 +241,7 @@ describe('hLock#unlock failure tracking', function () {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
 
         // 2nd failure
-        return hl.unlock('lock-1', 'wrong-password', attempterId);
+        return hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
       })
       .then(errorExpected, (err) => {
 
@@ -252,7 +255,7 @@ describe('hLock#unlock failure tracking', function () {
       })
       .then(() => {
         // 3rd failure
-        return hl.unlock('lock-1', 'wrong-password', attempterId);
+        return hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
       })
       .then(errorExpected, (err) => {
         debug(err.name);
@@ -261,7 +264,7 @@ describe('hLock#unlock failure tracking', function () {
 
         // 4th attempt after 3 consecutive failures should return permanently disable
         // even with the correct secret
-        return hl.unlock('lock-1', 'secret-1', attempterId);
+        return hl.unlock(ASSETS.lockId, 'secret-1', attempterId);
       })
       .then(errorExpected, (err) => {
         debug(err.name);
