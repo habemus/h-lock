@@ -1,0 +1,3 @@
+- enable lock expiry
+- enable lock single-use mode
+- review MODEL and remove _unlockFailureCount

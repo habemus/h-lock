@@ -83,4 +83,34 @@ describe('hLock#create', function () {
         done(err);
       });
   });
+
+  it('should allow setting metadata onto the lock', function (done) {
+
+    var promise = ASSETS.hl.create('my-secret', {
+      meta: {
+        someMetaData: 'some meta value',
+      }
+    });
+
+    // ensure promise is an instance of Bluebird
+    promise.should.be.instanceof(Bluebird);
+
+    promise.then((lockId) => {
+
+        lockId.should.be.a.String();
+
+        return ASSETS.db.collection('testlocks').find().toArray();
+      })
+      .then((locks) => {
+        locks.length.should.equal(1);
+        locks[0].meta.someMetaData.should.eql('some meta value');
+
+        done();
+      })
+      .catch((err) => {
+
+
+        done(err);
+      });
+  });
 });
