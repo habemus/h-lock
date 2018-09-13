@@ -1,7 +1,6 @@
 const assert = require('assert');
 
 // third-party dependencies
-const Bluebird = require('bluebird');
 const should = require('should');
 
 // lib
@@ -36,8 +35,8 @@ describe('hLock#create', function () {
 
     var promise = ASSETS.hl.create(undefined, {});
 
-    // ensure promise is an instance of Bluebird
-    promise.should.be.instanceof(Bluebird);
+    // ensure promise is an instance of Promise
+    promise.should.be.instanceof(Promise);
 
     promise.then(() => {
         done(new Error('error expected'));
@@ -63,8 +62,8 @@ describe('hLock#create', function () {
 
     var promise = ASSETS.hl.create('my-secret', {});
 
-    // ensure promise is an instance of Bluebird
-    promise.should.be.instanceof(Bluebird);
+    // ensure promise is an instance of Promise
+    promise.should.be.instanceof(Promise);
 
     promise.then((lockId) => {
 
@@ -92,8 +91,8 @@ describe('hLock#create', function () {
       }
     });
 
-    // ensure promise is an instance of Bluebird
-    promise.should.be.instanceof(Bluebird);
+    // ensure promise is an instance of Promise
+    promise.should.be.instanceof(Promise);
 
     promise.then((lockId) => {
 

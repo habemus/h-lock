@@ -1,7 +1,6 @@
 const assert = require('assert');
 
 // third-party dependencies
-const Bluebird = require('bluebird');
 const should = require('should');
 
 // lib

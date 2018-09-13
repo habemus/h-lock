@@ -3,7 +3,6 @@ const assert = require('assert');
 // third-party dependencies
 const should = require('should');
 const ObjectId = require('mongoose').Types.ObjectId;
-const Bluebird = require('bluebird');
 
 // lib
 const hLock = require('../../lib');
@@ -52,7 +51,7 @@ describe('hLock#reset', function () {
 
     var promise = ASSETS.hl.reset(ASSETS.lockId1, 'another-secret');
 
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then((result) => {
 
@@ -73,7 +72,7 @@ describe('hLock#reset', function () {
 
     var promise = ASSETS.hl.reset(new ObjectId().toString(), 'another-secret');
 
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then(() => {
         done(new Error('expected error'));
@@ -90,7 +89,7 @@ describe('hLock#reset', function () {
 
     var promise = ASSETS.hl.reset(undefined, 'another-secret');
 
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then(() => {
         done(new Error('expected error'));
@@ -106,7 +105,7 @@ describe('hLock#reset', function () {
   it('should fail if no secret is passed', function (done) {
 
     var promise = ASSETS.hl.reset(ASSETS.lockId1, undefined);
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then(() => {
         done(new Error('expected error'));

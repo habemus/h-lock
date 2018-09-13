@@ -3,7 +3,6 @@ const assert = require('assert');
 // third-party dependencies
 const should = require('should');
 const debug = require('debug')('h-lock-unlock-failure');
-const Bluebird = require('bluebird');
 
 // lib
 const hLock = require('../../lib');
@@ -71,7 +70,7 @@ describe('hLock#unlock failure tracking', function () {
 
     var promise = hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
 
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
@@ -112,7 +111,7 @@ describe('hLock#unlock failure tracking', function () {
     // attempter1 1st attempt
     var promise = hl.unlock(ASSETS.lockId, 'wrong-password', attempter1);
 
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
@@ -162,7 +161,7 @@ describe('hLock#unlock failure tracking', function () {
 
     // 1st failure
     var promise = hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);
@@ -210,7 +209,7 @@ describe('hLock#unlock failure tracking', function () {
 
     // 1st failure
     var promise = hl.unlock(ASSETS.lockId, 'wrong-password', attempterId);
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then(errorExpected, (err) => {
         err.should.be.instanceof(hLock.errors.InvalidSecret);

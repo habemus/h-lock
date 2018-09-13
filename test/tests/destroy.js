@@ -2,7 +2,6 @@ const assert = require('assert');
 
 // third-party dependencies
 const should = require('should');
-const Bluebird = require('bluebird');
 const ObjectId = require('mongoose').Types.ObjectId;
 
 // lib
@@ -52,7 +51,7 @@ describe('hLock#destroy', function () {
 
     var promise = ASSETS.hl.destroy(ASSETS.lockId1);
 
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then((result) => {
 
@@ -80,7 +79,7 @@ describe('hLock#destroy', function () {
   it('should allow removing a lock that does not exist', function (done) {
     var promise = ASSETS.hl.destroy(new ObjectId().toString());
 
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then((result) => {
         should(result).be.undefined();
@@ -99,7 +98,7 @@ describe('hLock#destroy', function () {
   it('should require a lockId', function (done) {
     var promise = ASSETS.hl.destroy(undefined);
 
-    promise.should.be.instanceof(Bluebird);
+    promise.should.be.instanceof(Promise);
 
     promise.then(() => {
         done(new Error('error expected'));
