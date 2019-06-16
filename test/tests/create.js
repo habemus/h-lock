@@ -28,7 +28,7 @@ describe('hLock#create', function () {
   });
 
   afterEach(function (done) {
-    aux.teardown().then(() => { done(); });
+    aux.teardown(ASSETS).then(() => { done(); });
   });
 
   it('should require a lock secret', function (done) {

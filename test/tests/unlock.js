@@ -43,7 +43,7 @@ describe('hLock#unlock', function () {
   });
 
   afterEach(function (done) {
-    aux.teardown().then(() => { done(); });
+    aux.teardown(ASSETS).then(() => { done(); });
   });
 
   it('should unlock if the secret is correct', function (done) {

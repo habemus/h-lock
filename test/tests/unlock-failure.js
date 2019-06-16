@@ -11,7 +11,7 @@ const hLock = require('../../lib');
 const aux    = require('../auxiliary');
 
 /**
- * Auxiliary function 
+ * Auxiliary function
  * @param  {Number} ms
  * @return {Promise}
  */
@@ -57,7 +57,7 @@ describe('hLock#unlock failure tracking', function () {
   });
 
   afterEach(function (done) {
-    aux.teardown().then(() => { done(); });
+    aux.teardown(ASSETS).then(() => { done(); });
   });
 
   it('should enforce unlockFailureCooldownCount by counting unlock attempts per lock per attempter', function (done) {
@@ -134,7 +134,7 @@ describe('hLock#unlock failure tracking', function () {
       .then(() => {
 
         // success
-        
+
         // attempter2 3rd attempt with correct credentials
         // but should fail due to cooldown
         return hl.unlock(ASSETS.lockId, 'secret-1', attempter2);

@@ -44,7 +44,7 @@ describe('hLock#destroy', function () {
   });
 
   afterEach(function (done) {
-    aux.teardown().then(() => { done(); });
+    aux.teardown(ASSETS).then(() => { done(); });
   });
 
   it('should remove the lock from the database', function (done) {

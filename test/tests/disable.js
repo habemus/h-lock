@@ -44,7 +44,7 @@ describe('hLock#disable', function () {
   });
 
   afterEach(function (done) {
-    aux.teardown().then(() => { done(); });
+    aux.teardown(ASSETS).then(() => { done(); });
   });
 
   it('should set the lock\'s status to disabled', function (done) {

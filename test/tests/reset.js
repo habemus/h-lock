@@ -44,7 +44,7 @@ describe('hLock#reset', function () {
   });
 
   afterEach(function (done) {
-    aux.teardown().then(() => { done(); });
+    aux.teardown(ASSETS).then(() => { done(); });
   });
 
   it('should change the secret of the lock', function (done) {

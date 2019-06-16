@@ -57,7 +57,7 @@ describe('hLock#queryMeta', function () {
   });
 
   afterEach(function (done) {
-    aux.teardown().then(() => { done(); });
+    aux.teardown(ASSETS).then(() => { done(); });
   });
 
   it('should retrieve lockIds that match a given meta query', function () {
